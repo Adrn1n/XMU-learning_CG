@@ -8,11 +8,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>			// glm::value_ptr
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
+#include <vector>						//
 #include "Utils.h"
 using namespace std;
 
 #define numVAOs 1
-#define numVBOs 2
+// #define numVBOs 2
+#define numVBOs 3 //
 
 float cameraX, cameraY, cameraZ;
 GLuint renderingProgram;
@@ -51,6 +53,19 @@ void setupVertices(void)
 			-1.0f, -1.0f, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, -1.0f, 1.0f, // LF
 			1.0f, -1.0f, 1.0f, -1.0f, -1.0f, -1.0f, 1.0f, -1.0f, -1.0f	// RR
 		};
+
+	//
+	float octahedronPositions[74] =
+		{
+			0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+			0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, -1.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f,
+			0.0f, 1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+			0.0f, -1.0f, 0.0f, 0.0f, 0.0f, -1.0f, -1.0f, 0.0f, 0.0f,
+			0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f};
+
 	glGenVertexArrays(1, vao);
 	glBindVertexArray(vao[0]);
 	glGenBuffers(numVBOs, vbo);
@@ -59,6 +74,10 @@ void setupVertices(void)
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexPositions), vertexPositions, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(pyramidPositions), pyramidPositions, GL_STATIC_DRAW);
+
+	//
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(octahedronPositions), octahedronPositions, GL_STATIC_DRAW);
 }
 
 void init(GLFWwindow *window)
@@ -134,6 +153,22 @@ void display(GLFWwindow *window, double currentTime)
 	mvStack.pop();
 	mvStack.pop();
 	mvStack.pop();
+
+	//
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::translate(glm::mat4(1.0f), glm::vec3(sin((float)currentTime * 0.7) * 6.0, 0.0f, cos((float)currentTime * 0.7) * 6.0));
+	mvStack.push(mvStack.top());
+	mvStack.top() *= glm::rotate(glm::mat4(1.0f), (float)currentTime * 1.5f, glm::vec3(1.0, 1.0, 0.0));
+	mvStack.top() *= glm::scale(glm::mat4(1.0f), glm::vec3(0.8f, 0.8f, 0.8f));
+	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvStack.top()));
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+	glEnableVertexAttribArray(0);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glDrawArrays(GL_TRIANGLES, 0, 24);
+	mvStack.pop();
+
 	mvStack.pop(); // the final pop is for the view matrix
 }
 
@@ -152,7 +187,8 @@ int main(void)
 	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	GLFWwindow *window = glfwCreateWindow(600, 600, "Chapter 4 - program 4", NULL, NULL);
+	// GLFWwindow *window = glfwCreateWindow(600, 600, "Chapter 4 - program 4", NULL, NULL);
+	GLFWwindow *window = glfwCreateWindow(800, 600, "Lab2: Planet", NULL, NULL); //
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK)
 	{
