@@ -29,7 +29,7 @@
             ],
             "preLaunchTask": "Build",
             "internalConsoleOptions": "neverOpen",
-            // "miDebuggerPath": "D:/Qt/Tools/mingw1120_64/bin/gdb.exe", // Windows
+            "miDebuggerPath": "D:/Qt/Tools/mingw1120_64/bin/gdb.exe", // Windows
         }
     ]
 }
