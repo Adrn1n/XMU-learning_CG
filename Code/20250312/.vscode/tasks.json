@@ -48,8 +48,8 @@
         {
             "type": "shell",
             "label": "Make: build",
-            // "command": "make", // Linux
-            "command": "mingw32-make", // Windows
+            "command": "make", // Linux
+            // "command": "mingw32-make", // Windows
             // "args": [],
             // "options": {
             //     "cwd": "${fileDirname}"

@@ -2,7 +2,8 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <SOIL2/soil2.h>
+// #include <SOIL2/soil2.h>
+#include <soil2/SOIL2.h>
 #include <string>
 #include <iostream>
 #include <fstream>

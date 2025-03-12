@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(Hello_OpenGL VERSION 0.1 LANGUAGES CXX)
+project(Lab2_Planets VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,8 +22,15 @@ include_directories(
     ${SOIL2_INCLUDE_DIRS}
 )
 
+include_directories(
+    inc
+)
+
 set(PROJECT_SOURCES
     src/main.cpp
+    src/Utils.cpp
+
+    inc/Utils.h
 )
 
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})

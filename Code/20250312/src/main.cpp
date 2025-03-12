@@ -8,7 +8,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>			// glm::value_ptr
 #include <glm/gtc/matrix_transform.hpp> // glm::translate, glm::rotate, glm::scale, glm::perspective
-#include <vector>						//
 #include "Utils.h"
 using namespace std;
 
