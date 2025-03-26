@@ -1,0 +1,11 @@
+cmake-build-debug/
+build/
+bin/
+obj/
+**TEMP**
+**TMP**
+**temp**
+**tmp**
+Ref/
+Docs/.obsidian/
+
