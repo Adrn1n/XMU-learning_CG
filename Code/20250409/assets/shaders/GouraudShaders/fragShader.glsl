@@ -1,4 +1,5 @@
-#version 430
+// #version 430
+#version 410
 
 in vec4 varyingColor;
 out vec4 fragColor;

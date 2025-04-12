@@ -11,10 +11,11 @@
             "program": "${command:cmake.launchTargetPath}", //"enter program name, for example ${workspaceFolder}/a.out",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/build",
             "environment": [],
             "externalConsole": false,
-            "MIMode": "gdb",
+            // "MIMode": "gdb",
+            "MIMode": "lldb", // MacOS
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

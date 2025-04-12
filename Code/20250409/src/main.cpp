@@ -120,7 +120,9 @@ void setupVertices(void)
 void init(GLFWwindow *window)
 {
 	// renderingProgram = Utils::createShaderProgram("./GouraudShaders/vertShader.glsl", "./GouraudShaders/fragShader.glsl");
-	renderingProgram = Utils::createShaderProgram("assets/shaders/GouraudShaders/vertShader.glsl", "assets/shaders/GouraudShaders/fragShader.glsl");
+	// renderingProgram = Utils::createShaderProgram("assets/shaders/GouraudShaders/vertShader.glsl", "assets/shaders/GouraudShaders/fragShader.glsl");
+	// renderingProgram = Utils::createShaderProgram("assets/shaders/PhongShaders/vertShader.glsl", "assets/shaders/PhongShaders/fragShader.glsl");
+	renderingProgram = Utils::createShaderProgram("assets/shaders/BlinnPhongShaders/vertShader.glsl", "assets/shaders/BlinnPhongShaders/fragShader.glsl");
 	cameraX = 0.0f;
 	cameraY = 0.0f;
 	cameraZ = 1.0f;
@@ -196,7 +198,8 @@ int main(void)
 		exit(EXIT_FAILURE);
 	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	// glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 	GLFWwindow *window = glfwCreateWindow(800, 600, "Lab4 Iluminar", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK)
