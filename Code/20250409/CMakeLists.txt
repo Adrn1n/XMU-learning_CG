@@ -113,4 +113,11 @@ elseif(UNIX)
     endif()
 endif()
 
-file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
+add_custom_target(copy_assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/assets
+    ${CMAKE_BINARY_DIR}/assets
+    COMMENT "Copying assets to output directory"
+)
+
+add_dependencies(${PROJECT_NAME} copy_assets)
