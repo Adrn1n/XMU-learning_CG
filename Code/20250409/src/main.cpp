@@ -14,7 +14,7 @@ float toRadians(float degrees) { return (degrees * 2.0f * 3.14159f) / 360.0f; }
 
 #define numVAOs 1
 #define numVBOs 4
-#define MAX_LIGHTS 16
+#define MAX_LIGHTS 8
 
 float cameraX, cameraY, cameraZ;
 float torLocX, torLocY, torLocZ;
@@ -31,13 +31,13 @@ int numTorusIndices = myTorus.getNumIndices();
  */
 struct Light
 {
-	float ambient[4];
-	float diffuse[4];
-	float specular[4];
+	glm::vec4 ambient;
+	glm::vec4 diffuse;
+	glm::vec4 specular;
 	glm::vec3 initialPosition;
 };
-int numActiveLights = 2;
-vector<Light> lights = {{{0.1f, 0.0f, 0.0f, 1.0f}, {2.0f, 0.0f, 0.0f, 1.0f}, {2.0f, 0.0f, 0.0f, 1.0f}, glm::vec3(5.0f, 2.0f, 2.0f)}, {{0.0f, 0.0f, 0.1f, 1.0f}, {0.0f, 0.0f, 2.0f, 1.0f}, {0.0f, 0.0f, 2.0f, 1.0f}, glm::vec3(-5.0f, -2.0f, -2.0f)}};
+vector<Light> lights = {{glm::vec4(0.1f, 0.0f, 0.0f, 1.0f), glm::vec4(2.0f, 0.0f, 0.0f, 1.0f), glm::vec4(2.0f, 0.0f, 0.0f, 1.0f), glm::vec3(5.0f, 2.0f, 2.0f)}, {glm::vec4(0.0f, 0.0f, 0.1f, 1.0f), glm::vec4(0.0f, 0.0f, 2.0f, 1.0f), glm::vec4(0.0f, 0.0f, 2.0f, 1.0f), glm::vec3(-5.0f, -2.0f, -2.0f)}};
+int numActiveLights = min((int)lights.size(), MAX_LIGHTS); //
 
 float amt = 0.0f;
 
@@ -50,8 +50,8 @@ float aspect;
 glm::mat4 pMat, vMat, mMat, mvMat, invTrMat, rMat;
 // glm::vec3 currentLightPos, transformed;
 // float lightPos[3];
-vector<glm::vec3> currentLightPositions; //
-vector<float> lightPos(3 * MAX_LIGHTS);	 //
+vector<glm::vec3> currentLightPos(numActiveLights + 1); //
+vector<float> lightPos(3 * numActiveLights);			//
 
 // white light
 float globalAmbient[4] = {0.7f, 0.7f, 0.7f, 1.0f};
@@ -77,12 +77,8 @@ void installLights(glm::mat4 vMatrix)
 	// lightPos[2] = transformed.z;
 	/*
 	 */
-	lightPos.resize(numActiveLights * 3);
 	for (int i = 0; i < numActiveLights; ++i)
-	{
-		glm::vec3 transformed = glm::vec3(vMatrix * glm::vec4(currentLightPositions[i], 1.0f));
-		lightPos[i * 3] = transformed.x, lightPos[i * 3 + 1] = transformed.y, lightPos[i * 3 + 2] = transformed.z;
-	}
+		currentLightPos.back() = glm::vec3(vMatrix * glm::vec4(currentLightPos[i], 1.0f)), lightPos[i * 3] = (currentLightPos.back()).x, lightPos[i * 3 + 1] = (currentLightPos.back()).y, lightPos[i * 3 + 2] = (currentLightPos.back()).z;
 
 	// get the locations of the light and material fields in the shader
 	numLightsLoc = glGetUniformLocation(renderingProgram, "numLights"); //
@@ -118,9 +114,9 @@ void installLights(glm::mat4 vMatrix)
 		GLuint specLoc = glGetUniformLocation(renderingProgram, (lightBaseStr + ".specular").c_str());
 		GLuint posLoc = glGetUniformLocation(renderingProgram, (lightBaseStr + ".position").c_str());
 
-		glProgramUniform4fv(renderingProgram, ambLoc, 1, lights[i].ambient);
-		glProgramUniform4fv(renderingProgram, diffLoc, 1, lights[i].diffuse);
-		glProgramUniform4fv(renderingProgram, specLoc, 1, lights[i].specular);
+		glProgramUniform4fv(renderingProgram, ambLoc, 1, glm::value_ptr(lights[i].ambient));
+		glProgramUniform4fv(renderingProgram, diffLoc, 1, glm::value_ptr(lights[i].diffuse));
+		glProgramUniform4fv(renderingProgram, specLoc, 1, glm::value_ptr(lights[i].specular));
 		glProgramUniform3fv(renderingProgram, posLoc, 1, &lightPos[i * 3]);
 	}
 }
@@ -201,16 +197,15 @@ void display(GLFWwindow *window, double currentTime)
 	mMat *= glm::rotate(mMat, toRadians(35.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 	// currentLightPos = glm::vec3(initialLightLoc.x, initialLightLoc.y, initialLightLoc.z);
-	currentLightPositions.resize(numActiveLights); //
-	amt = currentTime * 25.0f;
+	// amt = currentTime * 25.0f;
 	// rMat = glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 0.0f, 1.0f));
 	// currentLightPos = glm::vec3(rMat * glm::vec4(currentLightPos, 1.0f));
 	/*
 	 */
 	for (int i = 0; i < numActiveLights; ++i)
 	{
-		float rotationDirection = (i % 2 == 0) ? 1.0f : -1.0f, rotationSpeed = 2.0f;
-		rMat = glm::rotate(glm::mat4(1.0f), toRadians(rotationDirection * amt * rotationSpeed), glm::vec3(0.0f, 0.0f, 1.0f)), currentLightPositions[i] = glm::vec3(rMat * glm::vec4(lights[i].initialPosition, 1.0f));
+		auto rotationSpeed = ((i % 2 == 0) ? 1.0f : -1.0f) * 25.0f;
+		amt = currentTime * rotationSpeed, rMat = glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 0.0f, 1.0f)), currentLightPos[i] = glm::vec3(rMat * glm::vec4(lights[i].initialPosition, 1.0f));
 	}
 
 	installLights(vMat);

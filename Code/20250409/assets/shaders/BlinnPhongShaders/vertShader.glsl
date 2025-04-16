@@ -1,7 +1,7 @@
 // #version 430
 #version 410
 
-#define MAX_LIGHTS 16
+#define MAX_LIGHTS 8
 
 layout(location = 0) in vec3 vertPos;
 layout(location = 1) in vec3 vertNormal;

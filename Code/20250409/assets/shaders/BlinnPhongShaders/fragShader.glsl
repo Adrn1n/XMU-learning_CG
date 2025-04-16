@@ -1,7 +1,7 @@
 // #version 430
 #version 410
 
-#define MAX_LIGHTS 16
+#define MAX_LIGHTS 8
 
 in vec3 varyingNormal;
 // in vec3 varyingLightDir;
