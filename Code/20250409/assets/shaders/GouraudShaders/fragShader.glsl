@@ -1,6 +1,8 @@
 // #version 430
 #version 410
 
+#define MAX_LIGHTS 8 //
+
 in vec4 varyingColor;
 out vec4 fragColor;
 
@@ -24,7 +26,9 @@ struct Material
 };
 
 uniform vec4 globalAmbient;
-uniform PositionalLight light;
+// uniform PositionalLight light;
+uniform int numLights;					   //
+uniform PositionalLight light[MAX_LIGHTS]; //
 uniform Material material;
 uniform mat4 mv_matrix;
 uniform mat4 proj_matrix;

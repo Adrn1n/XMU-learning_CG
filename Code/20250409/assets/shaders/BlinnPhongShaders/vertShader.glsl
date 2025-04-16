@@ -1,7 +1,7 @@
 // #version 430
 #version 410
 
-#define MAX_LIGHTS 8
+#define MAX_LIGHTS 8 //
 
 layout(location = 0) in vec3 vertPos;
 layout(location = 1) in vec3 vertNormal;
@@ -43,6 +43,7 @@ void main(void)
 
 	// varyingHalfVector =
 	// 	normalize(normalize(varyingLightDir) + normalize(-varyingVertPos)).xyz;
+
 	/*
 	 */
 	for (int i = 0; (i < MAX_LIGHTS) && (i < numLights); i++)

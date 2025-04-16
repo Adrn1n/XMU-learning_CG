@@ -1,7 +1,7 @@
 // #version 430
 #version 410
 
-#define MAX_LIGHTS 8
+#define MAX_LIGHTS 8 //
 
 in vec3 varyingNormal;
 // in vec3 varyingLightDir;
@@ -30,8 +30,8 @@ struct Material
 
 uniform vec4 globalAmbient;
 // uniform PositionalLight light;
-uniform PositionalLight light[MAX_LIGHTS]; //
 uniform int numLights;					   //
+uniform PositionalLight light[MAX_LIGHTS]; //
 uniform Material material;
 uniform mat4 mv_matrix;
 uniform mat4 proj_matrix;
@@ -39,7 +39,7 @@ uniform mat4 norm_matrix;
 
 void main(void)
 {
-	// // normalize the light, normal, and view vectors:
+	// normalize the light, normal, and view vectors:
 	// vec3 L = normalize(varyingLightDir);
 	vec3 N = normalize(varyingNormal);
 	vec3 V = normalize(-varyingVertPos);
@@ -57,24 +57,25 @@ void main(void)
 
 	// // compute ADS contributions (per pixel):
 	// vec3 ambient = ((globalAmbient * material.ambient) + (light.ambient * material.ambient)).xyz;
-	vec3 ambient = (globalAmbient * material.ambient).xyz;
 	// vec3 diffuse = light.diffuse.xyz * material.diffuse.xyz * max(cosTheta, 0.0);
 	// vec3 specular = light.specular.xyz * material.specular.xyz * pow(max(cosPhi, 0.0), material.shininess * 3.0);
-	vec3 diffuse = vec3(0.0);
-	vec3 specular = vec3(0.0);
+	vec3 ambient = (material.ambient * globalAmbient).xyz, diffuse = vec3(0.0), specular = vec3(0.0); //
 
 	/*
 	 */
 	for (int i = 0; (i < MAX_LIGHTS) && (i < numLights); i++)
 	{
 		vec3 L = normalize(varyingLightDir[i]), H = normalize(varyingHalfVector[i]);
+
 		float cosTheta = dot(L, N), cosPhi = dot(H, N);
-		ambient += (light[i].ambient * material.ambient).xyz;
+
+		ambient += (material.ambient * light[i].ambient).xyz;
+
 		if (cosTheta > 0.0)
 		{
-			diffuse += light[i].diffuse.xyz * material.diffuse.xyz * cosTheta;
+			diffuse += material.diffuse.xyz * light[i].diffuse.xyz * cosTheta;
 			if (cosPhi > 0.0)
-				specular += light[i].specular.xyz * material.specular.xyz * pow(cosPhi, material.shininess * 3.0);
+				specular += material.specular.xyz * light[i].specular.xyz * pow(cosPhi, material.shininess * 3.0);
 		}
 	}
 	if (numLights > 0)
