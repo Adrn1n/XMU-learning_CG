@@ -1,5 +1,5 @@
 // #version 430
-#version 410
+#version 410 //
 
 #define MAX_LIGHTS 8 //
 
@@ -69,14 +69,7 @@ void main(void)
 
 		float cosTheta = dot(L, N), cosPhi = dot(H, N);
 
-		ambient += (material.ambient * light[i].ambient).xyz;
-
-		if (cosTheta > 0.0)
-		{
-			diffuse += material.diffuse.xyz * light[i].diffuse.xyz * cosTheta;
-			if (cosPhi > 0.0)
-				specular += material.specular.xyz * light[i].specular.xyz * pow(cosPhi, material.shininess * 3.0);
-		}
+		ambient += (material.ambient * light[i].ambient).xyz, diffuse += material.diffuse.xyz * light[i].diffuse.xyz * max(cosTheta, 0.0), specular += material.specular.xyz * light[i].specular.xyz * pow(max(cosPhi, 0.0), material.shininess * 3.0);
 	}
 	if (numLights > 0)
 		diffuse /= float(numLights), specular /= float(numLights);

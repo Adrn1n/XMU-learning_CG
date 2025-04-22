@@ -36,8 +36,8 @@ struct Light
 	glm::vec4 specular;
 	glm::vec3 initialPosition;
 };
-vector<Light> lights = {{glm::vec4(0.1f, 0.0f, 0.0f, 1.0f), glm::vec4(2.0f, 0.0f, 0.0f, 1.0f), glm::vec4(2.0f, 0.0f, 0.0f, 1.0f), glm::vec3(5.0f, 2.0f, 2.0f)}, {glm::vec4(0.0f, 0.0f, 0.1f, 1.0f), glm::vec4(0.0f, 0.0f, 2.0f, 1.0f), glm::vec4(0.0f, 0.0f, 2.0f, 1.0f), glm::vec3(-5.0f, -2.0f, -2.0f)}};
-int numActiveLights = min((int)lights.size(), MAX_LIGHTS); //
+vector<Light> lights = {{glm::vec4(0.0f, 0.0f, 0.1f, 1.0f), glm::vec4(0.0f, 0.0f, 2.0f, 1.0f), glm::vec4(0.0f, 0.0f, 2.0f, 1.0f), glm::vec3(5.0f, 2.0f, 2.0f)}, {glm::vec4(0.1f, 0.0f, 0.0f, 1.0f), glm::vec4(2.0f, 0.0f, 0.0f, 1.0f), glm::vec4(2.0f, 0.0f, 0.0f, 1.0f), glm::vec3(-5.0f, -2.0f, -2.0f)}};
+int numActiveLights = min((int)lights.size(), MAX_LIGHTS);
 
 float amt = 0.0f;
 
@@ -204,7 +204,7 @@ void display(GLFWwindow *window, double currentTime)
 	 */
 	for (int i = 0; i < numActiveLights; ++i)
 	{
-		auto rotationSpeed = ((i % 2 == 0) ? 1.0f : -1.0f) * 25.0f;
+		auto rotationSpeed = ((i % 2) ? -1.0f : 1.0f) * 25.0f;
 		amt = currentTime * rotationSpeed, rMat = glm::rotate(glm::mat4(1.0f), toRadians(amt), glm::vec3(0.0f, 0.0f, 1.0f)), currentLightPos[i] = glm::vec3(rMat * glm::vec4(lights[i].initialPosition, 1.0f));
 	}
 
@@ -249,7 +249,7 @@ int main(void)
 	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	// glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); //
 	GLFWwindow *window = glfwCreateWindow(800, 600, "Lab4 Iluminar", NULL, NULL);
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK)

@@ -1,5 +1,5 @@
 // #version 430
-#version 410
+#version 410 //
 
 #define MAX_LIGHTS 8 //
 
@@ -63,17 +63,9 @@ void main(void)
 	{
 		vec3 L = normalize(varyingLightDir[i]), R = reflect(-L, N);
 
-		float cosTheta = dot(N, L);
+		float cosTheta = dot(N, L), cosPhi = dot(R, V);
 
-		ambient += (material.ambient * light[i].ambient).xyz;
-
-		if (cosTheta > 0.0)
-		{
-			diffuse += material.diffuse.xyz * light[i].diffuse.xyz * cosTheta;
-			float cosPhi = dot(R, V);
-			if (cosPhi > 0.0)
-				specular += material.specular.xyz * light[i].specular.xyz * pow(cosPhi, material.shininess);
-		}
+		ambient += (material.ambient * light[i].ambient).xyz, diffuse += material.diffuse.xyz * light[i].diffuse.xyz * max(cosTheta, 0.0), specular += material.specular.xyz * light[i].specular.xyz * pow(max(cosPhi, 0.0), material.shininess);
 	}
 	if (numLights > 0)
 		diffuse /= float(numLights), specular /= float(numLights);
