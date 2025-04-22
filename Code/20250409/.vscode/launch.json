@@ -15,7 +15,7 @@
             "environment": [],
             "externalConsole": false,
             // "MIMode": "gdb", // Windows & Linux
-            "MIMode": "lldb", // MacOS
+            "MIMode": "lldb", // macOS
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

@@ -48,7 +48,7 @@
         {
             "type": "shell",
             "label": "Make: build",
-            "command": "make", // Linux & MacOS
+            "command": "make", // Linux & macOS
             // "command": "mingw32-make", // Windows
             // "args": [],
             // "options": {
