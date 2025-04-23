@@ -427,7 +427,7 @@ int main(void)
 	// glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); //
 	// GLFWwindow *window = glfwCreateWindow(800, 800, "Chapter8 - program1", NULL, NULL);
-	GLFWwindow *window = glfwCreateWindow(800, 800, "Lab5 Shadow", NULL, NULL); //
+	GLFWwindow *window = glfwCreateWindow(800, 800, "Lab5 Shadows", NULL, NULL); //
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK)
 	{
