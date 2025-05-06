@@ -18,7 +18,8 @@ void passTwo(void);
 float toRadians(float degrees) { return (degrees * 2.0f * 3.14159f) / 360.0f; }
 
 #define numVAOs 1
-#define numVBOs 5
+// #define numVBOs 5
+#define numVBOs 7 //
 
 GLuint renderingProgram1, renderingProgram2;
 GLuint vao[numVAOs];
@@ -28,11 +29,13 @@ GLuint vbo[numVBOs];
 ImportedModel pyramid("assets/models/pyr.obj"); //
 Torus myTorus(0.6f, 0.4f, 48);
 int numPyramidVertices, numTorusVertices, numTorusIndices;
+int numGroundVertices; //
 
 glm::vec3 torusLoc(1.6f, 0.0f, -0.3f);
 glm::vec3 pyrLoc(-1.0f, 0.1f, 0.3f);
 glm::vec3 cameraLoc(0.0f, 0.2f, 6.0f);
 glm::vec3 lightLoc(-3.8f, 2.2f, 1.1f);
+glm::vec3 groundLoc(0.0f, -2.0f, 0.0f); //
 
 // white light
 float globalAmbient[4] = {0.7f, 0.7f, 0.7f, 1.0f};
@@ -51,6 +54,13 @@ float *bMatAmb = Utils::bronzeAmbient();
 float *bMatDif = Utils::bronzeDiffuse();
 float *bMatSpe = Utils::bronzeSpecular();
 float bMatShi = Utils::bronzeShininess();
+
+/*
+ */
+float *sMatAmb = Utils::silverAmbient();
+float *sMatDif = Utils::silverDiffuse();
+float *sMatSpe = Utils::silverSpecular();
+float sMatShi = Utils::silverShininess();
 
 float thisAmb[4], thisDif[4], thisSpe[4], matAmb[4], matDif[4], matSpe[4];
 float thisShi, matShi;
@@ -162,6 +172,14 @@ void setupVertices(void)
 		torusNvalues.push_back(norm[i].z);
 	}
 
+	/*
+	 */
+	numGroundVertices = 6;
+	float groundVertices[6 * 3] = {-7.5f, 0.0f, -7.5f, -7.5f, 0.0f, 7.5f, 7.5f, 0.0f, -7.5f, 7.5f, 0.0f, 7.5f, 7.5f, 0.0f, -7.5f, -7.5f, 0.0f, 7.5f};
+	float groundNormals[6 * 3] = {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+	std::vector<float> groundPvalues(groundVertices, groundVertices + sizeof(groundVertices) / sizeof(float));
+	std::vector<float> groundNvalues(groundNormals, groundNormals + sizeof(groundNormals) / sizeof(float));
+
 	glGenVertexArrays(1, vao);
 	glBindVertexArray(vao[0]);
 	glGenBuffers(numVBOs, vbo);
@@ -180,6 +198,13 @@ void setupVertices(void)
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[4]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, ind.size() * 4, &ind[0], GL_STATIC_DRAW);
+
+	/*
+	 */
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[5]);
+	glBufferData(GL_ARRAY_BUFFER, groundPvalues.size() * 4, &groundPvalues[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[6]);
+	glBufferData(GL_ARRAY_BUFFER, groundNvalues.size() * 4, &groundNvalues[0], GL_STATIC_DRAW);
 }
 
 void setupShadowBuffers(GLFWwindow *window)
@@ -231,6 +256,15 @@ void display(GLFWwindow *window, double currentTime)
 {
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	/*
+	 */
+	float lightRotateRadius = 5.0f, lightRotateSpeed = 0.5f, lightAngle = currentTime * lightRotateSpeed;
+	lightLoc.x = lightRotateRadius * cos(lightAngle), lightLoc.z = lightRotateRadius * sin(lightAngle);
+	float torusRotateRadius = 1.0f, torusRotateSpeed = 1.0f, torusAngle = currentTime * torusRotateSpeed;
+	torusLoc.x = torusRotateRadius * cos(torusAngle), torusLoc.z = torusRotateRadius * sin(torusAngle);
+	float pyrRotateRadius = 3.0f, pyrRotateSpeed = -0.75f, pyrAngle = currentTime * pyrRotateSpeed;
+	pyrLoc.x = pyrRotateRadius * cos(pyrAngle), pyrLoc.z = pyrRotateRadius * sin(pyrAngle);
 
 	currentLightPos = glm::vec3(lightLoc);
 
@@ -305,6 +339,16 @@ void passOne(void)
 	glDepthFunc(GL_LEQUAL);
 
 	glDrawArrays(GL_TRIANGLES, 0, numPyramidVertices);
+
+	/*
+	 */
+	mMat = glm::translate(glm::mat4(1.0f), groundLoc);
+	shadowMVP1 = lightPmatrix * lightVmatrix * mMat;
+	glUniformMatrix4fv(sLoc, 1, GL_FALSE, glm::value_ptr(shadowMVP1));
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2 * 3 - 1]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+	glDrawArrays(GL_TRIANGLES, 0, numGroundVertices);
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -408,6 +452,29 @@ void passTwo(void)
 	glDepthFunc(GL_LEQUAL);
 
 	glDrawArrays(GL_TRIANGLES, 0, numPyramidVertices);
+
+	/*
+	 */
+	thisAmb[0] = sMatAmb[0], thisAmb[1] = sMatAmb[1], thisAmb[2] = sMatAmb[2];
+	thisDif[0] = sMatDif[0], thisDif[1] = sMatDif[1], thisDif[2] = sMatDif[2];
+	thisSpe[0] = sMatSpe[0], thisSpe[1] = sMatSpe[1], thisSpe[2] = sMatSpe[2];
+	thisShi = sMatShi;
+	mMat = glm::translate(glm::mat4(1.0f), groundLoc);
+	installLights(renderingProgram2, vMat);
+	mvMat = vMat * mMat;
+	invTrMat = glm::transpose(glm::inverse(mvMat));
+	shadowMVP2 = b * lightPmatrix * lightVmatrix * mMat;
+	glUniformMatrix4fv(mvLoc, 1, GL_FALSE, glm::value_ptr(mvMat));
+	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(pMat));
+	glUniformMatrix4fv(nLoc, 1, GL_FALSE, glm::value_ptr(invTrMat));
+	glUniformMatrix4fv(sLoc, 1, GL_FALSE, glm::value_ptr(shadowMVP2));
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2 * 3 - 1]);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2 * 3]);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(1);
+	glDrawArrays(GL_TRIANGLES, 0, numGroundVertices);
 }
 
 void window_size_callback(GLFWwindow *win, int newWidth, int newHeight)
@@ -427,7 +494,7 @@ int main(void)
 	// glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1); //
 	// GLFWwindow *window = glfwCreateWindow(800, 800, "Chapter8 - program1", NULL, NULL);
-	GLFWwindow *window = glfwCreateWindow(800, 800, "Lab5 Shadows", NULL, NULL); //
+	GLFWwindow *window = glfwCreateWindow(800, 600, "Lab5 Shadows", NULL, NULL); //
 	glfwMakeContextCurrent(window);
 	if (glewInit() != GLEW_OK)
 	{
