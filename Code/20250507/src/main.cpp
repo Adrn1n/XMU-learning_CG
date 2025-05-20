@@ -91,8 +91,10 @@ void init(GLFWwindow *window)
 
 	// heightTexture = Utils::loadTexture("heightTexture.jpg");
 	// heightMap = Utils::loadTexture("height.jpg");
-	heightTexture = Utils::loadTexture("assets/images/heightTexture.jpg"); //
-	heightMap = Utils::loadTexture("assets/images/height.jpg");			   //
+	// heightTexture = Utils::loadTexture("assets/images/heightTexture.jpg"); //
+	// heightMap = Utils::loadTexture("assets/images/height.jpg");			   //
+	heightTexture = Utils::loadTexture("assets/images/rocky_terrain_diff_2k.png"); //
+	heightMap = Utils::loadTexture("assets/images/rocky_terrain_disp_2k_rgb.png"); //
 }
 
 void display(GLFWwindow *window, double currentTime)
