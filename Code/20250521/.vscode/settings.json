@@ -1,0 +1,13 @@
+{
+    "files.autoSave": "afterDelay",
+    "C_Cpp.default.cppStandard": "c++11",
+    "C_Cpp.default.cStandard": "c99",
+    "files.associations": {
+        "*.dbclient-js": "javascript",
+        "*.sqlbook": "sql",
+        "*.ndjson": "jsonl",
+        "iostream": "cpp",
+        "vector": "cpp",
+        "*.glsl": "cpp",
+    },
+}
