@@ -20,8 +20,9 @@ struct Ray
 };
 
 float sphere_radius = 0.8;
-vec3 sphere_position = vec3(0.5, 0.1, 3.2);
-vec3 sphere_color = vec3(1.0, 0.0, 0.0); // red
+// vec3 sphere_position = vec3(0.5, 0.1, 3.2);
+vec3 sphere_position = vec3(1.0, 0.1, 1.0); //
+vec3 sphere_color = vec3(1.0, 0.0, 0.0);	// red
 
 vec3 box_mins = vec3(-0.75, -0.75, -1.5);
 vec3 box_maxs = vec3(0.75, 0.75, 1.5);
@@ -34,7 +35,8 @@ vec3 rbox_color = vec3(1.0, 1.0, 1.0); // white
 const float PI = 3.14159265358;
 const float DEG_TO_RAD = PI / 180.0;
 
-vec3 box_pos = vec3(-0.2, 0.3, 0.5);
+// vec3 box_pos = vec3(-0.2, 0.3, 0.5);
+vec3 box_pos = vec3(-0.2, 0.3, 2.0); //
 float box_xrot = 90.0;
 float box_yrot = 25.0;
 float box_zrot = -20.0;
@@ -51,7 +53,8 @@ vec4 pointLight_ambient = vec4(0.2, 0.2, 0.2, 1.0);
 vec4 pointLight_diffuse = vec4(0.7, 0.7, 0.7, 1.0);
 vec4 pointLight_specular = vec4(1.0, 1.0, 1.0, 1.0);
 
-vec3 plane_pos = vec3(0, -2.5, -2.0); // 0,-1.2,-2
+// vec3 plane_pos = vec3(0, -2.5, -2.0); // 0,-1.2,-2
+vec3 plane_pos = vec3(0, 0, -2.0); // 0,-1.2,-2 //
 float plane_width = 12.0;
 float plane_depth = 8.0;
 float plane_xrot = DEG_TO_RAD * 0.0;
@@ -105,7 +108,8 @@ Collision intersect_plane_object(Ray r)
 	c.inside = false; // there is no "inside" of a plane
 
 	// compute intersection point of ray with plane
-	c.t = dot((vec3(0, 0, 0) - ray_start), vec3(0, 1, 0)) / dot(ray_dir, vec3(0, 1, 0));
+	// c.t = dot((vec3(0, 0, 0) - ray_start), vec3(0, 1, 0)) / dot(ray_dir, vec3(0, 1, 0));
+	c.t = dot((vec3(0, 0, 0) - ray_start), vec3(0, 0, 1)) / dot(ray_dir, vec3(0, 0, 1)); //
 
 	// Calculate the world-position of the intersection:
 	c.p = r.start + c.t * r.dir;
@@ -114,17 +118,20 @@ Collision intersect_plane_object(Ray r)
 	vec3 intersectPoint = ray_start + c.t * ray_dir;
 
 	// If the ray didn't intersect the plane object, return a negative t value
-	if ((abs(intersectPoint.x) > (plane_width / 2.0)) || (abs(intersectPoint.z) > (plane_depth / 2.0)))
+	// if ((abs(intersectPoint.x) > (plane_width / 2.0)) || (abs(intersectPoint.z) > (plane_depth / 2.0)))
+	if ((abs(intersectPoint.x) > (plane_width / 2.0)) || (abs(intersectPoint.y) > (plane_depth / 2.0))) //
 	{
 		c.t = -1.0;
 		return c;
 	}
 
 	// Create the collision normal
-	c.n = vec3(0.0, 1.0, 0.0);
+	// c.n = vec3(0.0, 1.0, 0.0);
+	c.n = vec3(0.0, 0.0, 1.0); //
 
 	// If we hit the plane from the negative axis, invert the normal
-	if (ray_dir.y > 0.0)
+	// if (ray_dir.y > 0.0)
+	if (ray_dir.z > 0.0) //
 		c.n *= -1.0;
 
 	// now convert the normal back into world space
@@ -133,7 +140,8 @@ Collision intersect_plane_object(Ray r)
 	// Compute texture coordinates
 	float maxDimension = max(plane_width, plane_depth);
 	(c.tc).x = (intersectPoint.x + plane_width / 2.0) / maxDimension;
-	(c.tc).y = (intersectPoint.z + plane_depth / 2.0) / maxDimension;
+	// (c.tc).y = (intersectPoint.z + plane_depth / 2.0) / maxDimension;
+	(c.tc).y = (intersectPoint.y + plane_depth / 2.0) / maxDimension; //
 	return c;
 }
 
@@ -533,13 +541,36 @@ vec3 raytrace2(Ray r)
 	if (c.object_index == 1)
 	{ // generate a secondary ray
 		Ray refracted_ray;
-		refracted_ray.start = c.p - c.n * 0.001;
-		refracted_ray.dir = refract(r.dir, c.n, 1.5);
+		// refracted_ray.start = c.p - c.n * 0.001;
+		// refracted_ray.dir = refract(r.dir, c.n, 1.5);
+		refracted_ray.start = c.p + c.n * 0.001; //
+		refracted_ray.dir = reflect(r.dir, c.n); //
 		vec3 refracted_color = raytrace3(refracted_ray);
 		return 2.0 * ads_phong_lighting(r, c) * refracted_color;
 	}
 	if (c.object_index == 2)
-		return ads_phong_lighting(r, c) * (texture(sampBrick, c.tc)).xyz;
+	// return ads_phong_lighting(r, c) * (texture(sampBrick, c.tc)).xyz;
+	/*
+	 */
+	{
+		Ray refracted_ray;
+		float eta = c.inside ? 1.5 : (1 / 1.5);
+		refracted_ray.start = c.p - c.n * 0.001;
+		refracted_ray.dir = refract(r.dir, c.n, eta);
+		vec3 refracted_color;
+		if (refracted_ray.dir == vec3(0.0))
+		{
+			refracted_ray.dir = r.dir;
+			Collision c_trans = get_closest_collision(refracted_ray);
+			if (c_trans.object_index == 1)
+				refracted_ray.start = c_trans.p + c_trans.n * (length(sphere_position - box_pos) + 0.5 * length(box_maxs - box_mins) - sphere_radius), refracted_ray.dir = reflect(refracted_ray.dir, c_trans.n), refracted_color = raytrace3(refracted_ray);
+			else
+				refracted_color = raytrace3(refracted_ray);
+		}
+		else
+			refracted_color = raytrace3(refracted_ray);
+		return 2.0 * ads_phong_lighting(r, c) * refracted_color;
+	}
 	if (c.object_index == 4)
 		return ads_phong_lighting(r, c) * (checkerboard(c.tc)).xyz;
 
@@ -571,13 +602,25 @@ vec3 raytrace(Ray r)
 	if (c.object_index == 1)
 	{ // generate a secondary ray
 		Ray refracted_ray;
-		refracted_ray.start = c.p - c.n * 0.001;
-		refracted_ray.dir = refract(r.dir, c.n, .66667);
+		// refracted_ray.start = c.p - c.n * 0.001;
+		// refracted_ray.dir = refract(r.dir, c.n, .66667);
+		refracted_ray.start = c.p + c.n * 0.001; //
+		refracted_ray.dir = reflect(r.dir, c.n); //
 		vec3 refracted_color = raytrace2(refracted_ray);
 		return 2.0 * ads_phong_lighting(r, c) * refracted_color;
 	}
 	if (c.object_index == 2)
-		return ads_phong_lighting(r, c) * (texture(sampBrick, c.tc)).xyz;
+	// return ads_phong_lighting(r, c) * (texture(sampBrick, c.tc)).xyz;
+	/*
+	 */
+	{
+		Ray refracted_ray;
+		float eta = c.inside ? 1.5 : (1.0 / 1.5);
+		refracted_ray.start = c.p - c.n * 0.001;
+		refracted_ray.dir = refract(r.dir, c.n, eta);
+		vec3 refracted_color = raytrace2(refracted_ray);
+		return 2.0 * ads_phong_lighting(r, c) * refracted_color;
+	}
 	if (c.object_index == 4)
 		return ads_phong_lighting(r, c) * (checkerboard(c.tc)).xyz;
 
